@@ -1,7 +1,7 @@
 (function(win, doc) {
 	'use strict';
 
-	var _arraySlice = Array.prototype.slice,
+	var _slice = Array.prototype.slice,
 		_prefixes = {
 			'#': 'getElementById',
 			'.': 'getElementsByClassName',
@@ -10,12 +10,28 @@
 		};
 
 	function bo(selector, context) {
-		var method = _prefixes[selector[0]],
-			match = (context || doc)[method](selector.slice(1)),
-			res = Object.create(bo.fn),
-			i;
-		[].push.apply(res, (match.length ? _arraySlice.call(match) : [match]));
-		return res;
+		var ret,
+			method,
+			match;
+
+		if (typeof selector == 'function') {
+			if (doc.readyState == 'loading') {
+				doc.addEventListener('DOMContentLoaded', selector);
+			} else {
+				selector();
+			}
+		} else {
+			ret = Object.create(bo.fn);
+			if (selector && selector.nodeType === 1) {
+				ret[0] = selector;
+				ret.length = 1;
+			} else {
+				method = _prefixes[selector[0]];
+				match = (context || doc)[method](selector.slice(1));
+				[].push.apply(ret, (match.length ? _slice.call(match) : [match]));
+			}
+			return ret;
+		}
 	}
 
 	bo.fn = Object.create(Array.prototype, {
@@ -52,6 +68,22 @@
 					elm.removeEventListener(event, handler);
 				});
 				return this;
+			}
+		},
+
+		css: {
+			value: function(prop, value) {
+				if (typeof prop == 'object') {
+					for (var name in prop) {
+						if (prop.hasOwnProperty(name)) this.css(name, prop[name]);
+					}
+				} else if (typeof value === 'undefined') {
+					return this.first.style[prop];
+				} else {
+					this.forEach(function(elm) {
+						elm.style[prop] = value;
+					});
+				}
 			}
 		},
 

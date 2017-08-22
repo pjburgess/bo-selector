@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+	<title>Bo-Selector Test</title>
+</head>
+<body>
+
+	<div id="outer" class="outer">
+		<div class="inner">
+			<span class="foobar">FooBar</span>
+		</div>
+	</div>
+
+	<script src="../dist/selector.js"></script>
+
+	<script>
+		$(function() {
+			console.log('DOM Ready.');
+			// console.log($('.foobar').html());
+			// console.log($('.inner')[0]);
+			// console.log($('>div').css('background-color'));
+			console.info($(document.getElementById('outer')));
+			// $('>div').css({
+			// 	'background-color': '#ccc',
+			// 	'color': '#0f0'
+			// });
+		});
+	</script>
+
+</body>
+</html>
