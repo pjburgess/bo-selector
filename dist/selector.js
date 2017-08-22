@@ -22,7 +22,10 @@
 			}
 		} else {
 			ret = Object.create(bo.fn);
-			if (selector && selector.nodeType === 1) {
+			if (selector.constructor === Object && selector.tag) {
+				ret[0] = bo.create(selector);
+				ret.length = 1;
+			} else if (selector && selector.nodeType === 1) {
 				ret[0] = selector;
 				ret.length = 1;
 			} else {
@@ -33,6 +36,52 @@
 			return ret;
 		}
 	}
+
+	bo.each = function(obj, callback) {
+		var i,
+			keys,
+			length;
+		if (Array.isArray(obj)) {
+			for (i = 0, length = obj.length; i < length; i++) {
+				if (callback(obj[i], i, obj) === false) {
+					break;
+				}
+			}
+		} else {
+			keys = Object.keys(obj);
+			for (i = 0, length = keys.length; i < length; i++) {
+				if (callback(obj[keys[i]], keys[i], obj) === false) {
+					break;
+				}
+			}
+		}
+		return obj;
+	};
+
+	bo.create = function(def) {
+		var elm;
+		def = Object(def);
+		elm = doc.createElement(def.tag || 'div');
+		bo.each(def, function(value, prop) {
+			prop = ({cls:'class', forElm: 'for'}[prop] || prop);
+			if (!/^tag|html|children$/i.test(prop)) {
+				elm.setAttribute(prop, value);
+			}
+		});
+		if (def.children) {
+			if (Array.isArray(def.children)) {
+				bx.each(def.children, function(kid) {
+					elm.appendChild(bo.create(kid));
+				});
+			} else {
+				elm.appendChild(bo.create(def.children));
+			}
+		}
+		if (def.html) {
+			elm.innerHTML = def.html;
+		}
+		return elm;
+	};
 
 	bo.fn = Object.create(Array.prototype, {
 		first: {
